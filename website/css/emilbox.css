@@ -2,3 +2,5 @@
 @import "elements/_variables.css";
 
 @import "elements/_loader.css";
+@import "elements/_header.css";
+@import "elements/_main.css";

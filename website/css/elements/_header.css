@@ -1,0 +1,16 @@
+.header {
+    background-color: var(--color-primary);
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: var(--topbar-height);
+    width: 100%;
+    padding: 0 var(--spacing-normal);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.header__logo {
+    height: 32px;
+}
