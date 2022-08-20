@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="398" height="398" viewBox="0 0 398 398">
+  <g id="Vinyl_record" data-name="Vinyl record" transform="translate(-12.232 -12.654)">
+    <circle id="Ellipse_1" data-name="Ellipse 1" cx="199" cy="199" r="199" transform="translate(12.233 12.654)" fill="#1d1d1d"/>
+    <g id="Ellipse_2" data-name="Ellipse 2" transform="translate(18.233 17.654)" fill="none" stroke="#0a0a0a" stroke-width="1">
+      <circle cx="193.5" cy="193.5" r="193.5" stroke="none"/>
+      <circle cx="193.5" cy="193.5" r="193" fill="none"/>
+    </g>
+    <g id="Ellipse_3" data-name="Ellipse 3" transform="translate(39.233 39.654)" fill="none" stroke="#0a0a0a" stroke-width="1">
+      <circle cx="169.5" cy="169.5" r="169.5" stroke="none"/>
+      <circle cx="169.5" cy="169.5" r="169" fill="none"/>
+    </g>
+    <g id="Ellipse_4" data-name="Ellipse 4" transform="translate(66.233 66.654)" fill="none" stroke="#0a0a0a" stroke-width="1">
+      <circle cx="142.5" cy="142.5" r="142.5" stroke="none"/>
+      <circle cx="142.5" cy="142.5" r="142" fill="none"/>
+    </g>
+    <g id="Ellipse_5" data-name="Ellipse 5" transform="translate(104.233 103.654)" fill="none" stroke="#0a0a0a" stroke-width="1">
+      <circle cx="107.5" cy="107.5" r="107.5" stroke="none"/>
+      <circle cx="107.5" cy="107.5" r="107" fill="none"/>
+    </g>
+    <g id="Ellipse_6" data-name="Ellipse 6" transform="translate(114.233 114.654)" fill="#0a0a0a" stroke="#0a0a0a" stroke-width="1" opacity="0.34">
+      <circle cx="97" cy="97" r="97" stroke="none"/>
+      <circle cx="97" cy="97" r="96.5" fill="none"/>
+    </g>
+    <ellipse id="Ellipse_7" data-name="Ellipse 7" cx="67.5" cy="67" rx="67.5" ry="67" transform="translate(141.233 141.654)" fill="#1f9991"/>
+    <g id="Ellipse_8" data-name="Ellipse 8" transform="translate(206.232 205.654)" fill="#fff" stroke="#707070" stroke-width="1">
+      <circle cx="5.5" cy="5.5" r="5.5" stroke="none"/>
+      <circle cx="5.5" cy="5.5" r="5" fill="none"/>
+    </g>
+    <circle id="Ellipse_1-2" data-name="Ellipse 1" cx="199" cy="199" r="199" transform="translate(12.233 12.654)" fill="#1d1d1d"/>
+    <g id="Ellipse_2-2" data-name="Ellipse 2" transform="translate(18.233 17.654)" fill="none" stroke="#0a0a0a" stroke-width="1">
+      <circle cx="193.5" cy="193.5" r="193.5" stroke="none"/>
+      <circle cx="193.5" cy="193.5" r="193" fill="none"/>
+    </g>
+    <g id="Ellipse_3-2" data-name="Ellipse 3" transform="translate(39.233 39.654)" fill="none" stroke="#0a0a0a" stroke-width="1">
+      <circle cx="169.5" cy="169.5" r="169.5" stroke="none"/>
+      <circle cx="169.5" cy="169.5" r="169" fill="none"/>
+    </g>
+    <g id="Ellipse_4-2" data-name="Ellipse 4" transform="translate(66.233 66.654)" fill="none" stroke="#0a0a0a" stroke-width="1">
+      <circle cx="142.5" cy="142.5" r="142.5" stroke="none"/>
+      <circle cx="142.5" cy="142.5" r="142" fill="none"/>
+    </g>
+    <g id="Ellipse_5-2" data-name="Ellipse 5" transform="translate(104.233 103.654)" fill="none" stroke="#0a0a0a" stroke-width="1">
+      <circle cx="107.5" cy="107.5" r="107.5" stroke="none"/>
+      <circle cx="107.5" cy="107.5" r="107" fill="none"/>
+    </g>
+    <g id="Ellipse_6-2" data-name="Ellipse 6" transform="translate(114.233 114.654)" fill="#0a0a0a" stroke="#0a0a0a" stroke-width="1" opacity="0.34">
+      <circle cx="97" cy="97" r="97" stroke="none"/>
+      <circle cx="97" cy="97" r="96.5" fill="none"/>
+    </g>
+    <ellipse id="Ellipse_7-2" data-name="Ellipse 7" cx="67.5" cy="67" rx="67.5" ry="67" transform="translate(141.233 141.654)" fill="#1f9991"/>
+    <circle id="Ellipse_11" data-name="Ellipse 11" cx="5.5" cy="5.5" r="5.5" transform="translate(206.233 205.654)" fill="#fff"/>
+  </g>
+</svg>
