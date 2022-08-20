@@ -1,0 +1,22 @@
+.volume-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    background-color: var(--color-primary-light);
+    border-radius: var(--border-radius-normal);
+    padding: var(--spacing-normal);
+    position: relative;
+}
+
+.volume-card__title {
+    color: var(--color-primary);
+    opacity: .75;
+    margin-bottom: var(--spacing-s);
+}
+
+.volume-card__buttons {
+    display: flex;
+    gap: var(--spacing-l);
+    margin-bottom: var(--spacing-l);
+}

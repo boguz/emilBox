@@ -1,0 +1,19 @@
+input[type="range"] {
+    --input-range-height: 8px;
+
+    width: 100%;
+    margin: var(--spacing-l) 0;
+    appearance: none;
+    background-color: var(--color-primary);
+    height: var(--input-range-height);
+    border-radius: calc(var(--input-range-height) / 2);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    width: calc(var(--spacing-normal) + 4px);
+    height: calc(var(--spacing-normal) + 4px);
+    border-radius: 50%;
+    -webkit-appearance: none;
+    cursor: ew-resize;
+    background: var(--color-primary-dark);
+}

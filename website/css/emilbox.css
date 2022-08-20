@@ -4,3 +4,9 @@
 @import "elements/_header.css";
 @import "elements/_main.css";
 @import "elements/_tabs.css";
+@import "elements/_media-player.css";
+@import "elements/_button.css";
+@import "elements/_volume-card.css";
+@import "elements/_input-range.css";
+@import "elements/_checkbox.css";
+@import "elements/_checkbox-label.css";

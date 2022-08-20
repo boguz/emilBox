@@ -1,0 +1,61 @@
+.button {
+    display: block;
+    height: var(--button-size);
+    width: var(--button-size);
+    background-color: var(--color-primary);
+    border: none;
+    border-radius: 50%;
+    position: relative;
+}
+
+.button::after {
+    content: "";
+    display: block;
+    height: var(--button-icon-size);
+    width: var(--button-icon-size);
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: contain;
+    background-color: var(--color-bg);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.button--rewind::after {
+    mask-image: var(--icon-rewind);
+    left: calc(50% + 2px);
+}
+
+.button--toggle::after {
+    mask-size: calc(var(--button-icon-size) - 8px);
+    mask-image: var(--icon-stop);
+}
+
+.button--forward::after {
+    mask-image: var(--icon-forward);
+    left: calc(50% + 2px);
+}
+
+.button--volume-down::after {
+    mask-image: var(--icon-volume-down);
+    left: calc(50% + 2px);
+    mask-size: calc(var(--button-icon-size) - 4px);
+}
+
+.button--volume-up::after {
+    mask-image: var(--icon-volume-up);
+    left: calc(50% + 2px);
+    mask-size: calc(var(--button-icon-size) - 4px);
+}
+
+.button:active {
+    background-color: var(--color-primary-dark);
+}
+
+@media (hover: hover) {
+    .button:hover {
+        background-color: var(--color-primary-dark);
+    }
+}

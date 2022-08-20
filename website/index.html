@@ -29,7 +29,28 @@
             </div>
             <div class="tags__content">
                 <div class="tabs__content" tab-id="Player">
-                    content player
+                    <article class="media-player">
+                        <i class="media-player__image"></i>
+                        <h3 class="media-player__title">Bach</h3>
+                        <p class="media-player__track">Air on the G string</p>
+                        <div class="media-player__buttons">
+                            <button class="button button--rewind"></button>
+                            <button class="button button--toggle"></button>
+                            <button class="button button--forward"></button>
+                        </div>
+                    </article>
+                    <article class="volume-card">
+                        <h3 class="volume-card__title">Volume</h3>
+                        <input type="range" min="0" max="30" class="volume-card__input" value="15">
+                        <div class="volume-card__buttons">
+                            <button class="button button--volume-down"></button>
+                            <button class="button button--volume-up"></button>
+                        </div>
+                        <label for="limitVolumeCheckbox" class="checkbox-label">
+                            <input type="checkbox" name="limitVolumeCheckbox" id="limitVolumeCheckbox" class="checkbox" checked>
+                            Limit the volume range
+                        </label>
+                    </article>
                 </div>
                 <div class="tabs__content" tab-id="Catalogue">
                     content catalogue
