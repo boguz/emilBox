@@ -1,0 +1,24 @@
+{
+  "name": "emilbox-website",
+  "version": "1.0.0",
+  "description": "Webapp for the emilBox",
+  "main": "index.html",
+  "scripts": {
+    "lint:css": "npx stylelint ./css/**/*.css",
+    "dev:css": "postcss css/emilbox.css --dir ./build/css/ --watch --verbose",
+    "build:css": "NODE_ENV=production postcss css/emilbox.css -d ./build/css/",
+    "dev:js": "NODE_ENV=production esbuild js/emilbox.ts --bundle --outdir=./build/js/ --format=esm --watch --target=es6",
+    "build:js": "NODE_ENV=production esbuild js/emilbox.ts --bundle --outdir=./build/js/ --format=esm --minify --target=es6"
+  },
+  "author": "LuisPato",
+  "license": "MIT",
+  "devDependencies": {
+    "autoprefixer": "^10.4.8",
+    "cssnano": "^5.1.13",
+    "esbuild": "^0.15.5",
+    "postcss-cli": "^10.0.0",
+    "postcss-import": "^14.1.0",
+    "stylelint": "^14.10.0",
+    "stylelint-config-standard": "^27.0.0"
+  }
+}
