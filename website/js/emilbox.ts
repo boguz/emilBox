@@ -1,7 +1,17 @@
-console.log('TEST');
+import { initTabs } from "./elements/_tags.js";
 
-function aaa() {
-    console.log('another test!!!');
+/**
+ * Initialize the custom JS for the emilBox
+ */
+function initEmilBox() {
+    initTabs();
 }
 
-aaa();
+/**
+ * Wait for document to load before initializing the custom js
+ */
+if (document.readyState === "complete" || document.readyState === "interactive") {
+    setTimeout(initEmilBox);
+} else {
+    document.addEventListener("DOMContentLoaded", initEmilBox);
+}
