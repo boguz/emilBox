@@ -7,7 +7,7 @@
     align-items: center;
     justify-content: flex-start;
     gap: var(--spacing-l);
-    margin-bottom: var(--spacing-normal);
+    margin-bottom: var(--spacing-xl);
 }
 
 .tabs__button {
