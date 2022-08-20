@@ -1,0 +1,37 @@
+.catalogue {
+
+}
+
+.catalogue__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.catalogue__group {
+    margin-bottom: var(--spacing-l);
+}
+
+.catalogue__group:last-child {
+    margin-bottom: 0;
+}
+
+.catalogue__title {
+    text-transform: uppercase;
+    color: var(--color-primary-dark);
+    margin-bottom: var(--spacing-s);
+    opacity: .5;
+}
+
+.catalogue__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-s);
+}
+
+.catalogue__track-name,
+.catalogue__track-duration {
+    font-weight: var(--font-weight-normal);
+    color: var(--color-primary-dark);
+}
