@@ -2,7 +2,7 @@
 ESP32 based Toniebox clone
 
 ## Materials
-- Board: ESP32 doit devkit v1
+- Board: ESP32 doit devkit v1 [pins](https://www.mischianti.org/2021/02/17/doit-esp32-dev-kit-v1-high-resolution-pinout-and-specs/)
 
 ## Connections
 #### RFID RC522 [diagram here](https://esp32io.com/tutorials/esp32-rfid-nfc):

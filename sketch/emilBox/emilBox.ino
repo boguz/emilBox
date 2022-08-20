@@ -10,6 +10,32 @@ MFRC522 rfidReader(SS_PIN, RST_PIN);
 uint8_t control = 0x00;
 uint8_t rfidReadInterval = 100;
 
+// Tag ids
+String TAG_TEST =           "93 44 5C 92";
+String TAG_BACH =           "9C CD 69 0F";
+String TAG_MOZART =         "***********";
+String TAG_BEETHOVEN =      "*******";
+String TAG_TCHAIKOVSKI =    "*******";
+String TAG_DEBUSSY =        "*******";
+String TAG_SAINT_SAENS =    "*******";
+String TAG_PROKOFIEV =      "*******";
+String TAG_VIVALDI =        "*******";
+String TAG_CHILDREN =       "*******";
+
+// Folder ids
+int FOLDER_BACH =          1;
+int FOLDER_MOZART =        2;
+int FOLDER_BEETHOVEN =     3;
+int FOLDER_TCHAIKOVSKI =   4;
+int FOLDER_DEBUSSY =       5;
+int FOLDER_SAINT_SAENS =   6;
+int FOLDER_PROKOFIEV =     7;
+int FOLDER_VIVALDI =       8;
+int FOLDER_CHILDREN =      9;
+
+/******************************************************************************************
+***     SETUP                                                                           ***
+******************************************************************************************/
 void setup() {
   Serial.begin(115200);
 
@@ -19,6 +45,42 @@ void setup() {
   Serial.println("RFID Reader is ready...");
 }
 
+
+/******************************************************************************************
+***     GET TAG UID                                                                     ***
+******************************************************************************************/
+String getTagUid() {
+  String content = "";
+  byte letter;
+  for (byte i = 0; i < rfidReader.uid.size; i++) {
+    content.concat(String(rfidReader.uid.uidByte[i] < 0x10 ? " 0" : " "));
+    content.concat(String(rfidReader.uid.uidByte[i], HEX));
+  }
+  content.toUpperCase();
+  String tag_uid = content.substring(1);
+  return content.substring(1);
+}
+
+
+/******************************************************************************************
+***     CHECK TAG VALIDITY AND START PLAY IF RELEVANT                                   ***
+******************************************************************************************/
+void checkTagValidity(String tag_uid) {
+  if (tag_uid == TAG_TEST) {
+    Serial.println("BLUE TAG");
+    /*myDFPlayer.playFolder(1, 1);*/
+  } else if (tag_uid == TAG_BACH) {
+    Serial.println("BACH");
+  } else {
+    Serial.println("UNKNOWN CARD: ");
+    Serial.print(tag_uid);
+  }
+}
+
+
+/******************************************************************************************
+***     LOOP                                                                            ***
+******************************************************************************************/
 void loop() {
   if (!rfidReader.PICC_IsNewCardPresent()) {
     return;
@@ -27,7 +89,14 @@ void loop() {
     return;
   }
 
-  Serial.print("NewCard ");
+  Serial.println("NewCard ");
+
+  // Get tag uid
+  String tag_uid = getTagUid();
+  Serial.print("TAG UID"); Serial.println(tag_uid);
+
+  // Check if valid tag
+  checkTagValidity(tag_uid);
 
   while (true) {
     control = 0;
