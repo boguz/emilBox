@@ -1,10 +1,12 @@
 import { initTabs } from "./elements/_tags.js";
 import { initInputRange } from "./elements/_inputRange.js";
+import { initWebSocket } from "./elements/wsClient.js";
 
 /**
  * Initialize the custom JS for the emilBox
  */
 function initEmilBox() {
+    initWebSocket();
     initTabs();
     initInputRange();
 }

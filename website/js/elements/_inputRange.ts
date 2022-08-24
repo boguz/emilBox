@@ -3,9 +3,6 @@ class InputRange {
 
     constructor(input: HTMLInputElement) {
         this.input = input;
-
-        console.log('xxx', this.input);
-
         this.input.addEventListener('input', this._updateUI.bind(this));
 
         this._updateUI();

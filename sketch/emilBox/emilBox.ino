@@ -1,9 +1,28 @@
+#include <Arduino.h>
+#include <WiFi.h>
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+#include "SPIFFS.h"
+#include <Arduino_JSON.h>
+
 #include <SPI.h>
 #include <MFRC522.h>
 #include "DFRobotDFPlayerMini.h"
 
+// Network credentials
+const char* ssid = "REPLACE_WITH_YOUR_SSID";
+const char* password = "REPLACE_WITH_YOUR_PASSWORD";
+
+// Create AsyncWebServer object on port 80
+AsyncWebServer server(80);
+
+// Create WebSocket object
+AsyncWebSocket ws("/ws");
+
+String message = "";
+
 // RFID Reader Pins
-#define RFID_CARD_SS_PIN  5  // ESP32 pin GIOP5 
+#define RFID_CARD_SS_PIN  5  // ESP32 pin GIOP5
 #define RFID_CARD_RST_PIN 27 // ESP32 pin GIOP27
 
 // RFID Reader variables
@@ -40,17 +59,79 @@ int FOLDER_PROKOFIEV =     7;
 int FOLDER_VIVALDI =       8;
 int FOLDER_CHILDREN =      9;
 
-/******************************************************************************************
-***     SETUP                                                                           ***
-******************************************************************************************/
-void setup() {
-  // Start serial communication
-  Serial.begin(115200);
+// State variables
+boolean isPlaying = false;
+boolean isValidTag = false;
+String artistPlaying = "";
+String songPlaying = "";
 
-  // RFID Reader setup
-  SPI.begin(); // init SPI bus
-  rfidReader.PCD_Init(); // init RFID reader
-  Serial.println("RFID Reader is ready...");
+
+/******************************************************************************************
+***     INIT SPIFFS                                                                     ***
+******************************************************************************************/
+void initFS() {
+  if(!SPIFFS.begin()) {
+    Serial.println("An error has occurred while mounting SPIFFS!");  
+  } else {
+    Serial.println("SPIFFS mounted successfully");
+  }
+}
+
+
+/******************************************************************************************
+***     INIT WIFI                                                                       ***
+******************************************************************************************/
+void initWiFi() {
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+  Serial.println("Connecting to WiFi...");
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print('.');
+    delay(1000);  
+  }
+  Serial.println(WiFi.localIP());
+}
+
+/******************************************************************************************
+***     NOTIFY CLIENTS                                                                  ***
+******************************************************************************************/
+void notifyClients(String sliderValues) {
+  ws.textAll(sliderValues);
+}
+
+
+/******************************************************************************************
+***     HANDLE WS MESSAGE                                                               ***
+******************************************************************************************/
+void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
+  AwsFrameInfo *info = (AwsFrameInfo*)arg;
+  if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
+    data[len] = 0;
+    message = (char*)data;
+    Serial.println("Handling WS message");
+    Serial.println("message");
+  }
+}
+
+
+/******************************************************************************************
+***     HANDLE WS EVENTS                                                                ***
+******************************************************************************************/
+void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len) {
+  switch (type) {
+    case WS_EVT_CONNECT:
+      Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
+      break;
+    case WS_EVT_DISCONNECT:
+      Serial.printf("WebSocket client #%u disconnected\n", client->id());
+      break;
+    case WS_EVT_DATA:
+      handleWebSocketMessage(arg, data, len);
+      break;
+    case WS_EVT_PONG:
+    case WS_EVT_ERROR:
+      break;
+  }
 }
 
 
@@ -71,17 +152,98 @@ String getTagUid() {
 
 
 /******************************************************************************************
+***     INIT WEBSOCKET                                                                  ***
+******************************************************************************************/
+void initWebSocket() {
+  ws.onEvent(onEvent);
+  server.addHandler(&ws);
+}
+
+
+/******************************************************************************************
 ***     CHECK TAG VALIDITY AND START PLAY IF RELEVANT                                   ***
 ******************************************************************************************/
 void checkTagValidity(String tag_uid) {
   if (tag_uid == TAG_TEST) {
     Serial.println("BLUE TAG");
+    isValidTag = true;
+    artistPlaying = "Blue tag";
+    songPlaying = "blue song";
+    startPlayingSong();
   } else if (tag_uid == TAG_BACH) {
     Serial.println("BACH");
+    artistPlaying = "Bach tag";
+    songPlaying = "Bach song";
+    startPlayingSong();
   } else {
     Serial.println("UNKNOWN CARD: ");
     Serial.print(tag_uid);
+    isValidTag = false;
   }
+}
+
+/******************************************************************************************
+***     UPDATE WEB UI                                                                   ***
+******************************************************************************************/
+void updateWebUI() {
+  Serial.println("UPDATING WEB UI");
+  Serial.println("Is playingg =====> "); Serial.print(isPlaying);
+}
+
+
+/******************************************************************************************
+***     START PLAYING SONG                                                              ***
+******************************************************************************************/
+void startPlayingSong() {
+  Serial.println("START PLAYING");
+  Serial.println(artistPlaying);
+  Serial.println(songPlaying);
+  isPlaying = true;
+  updateWebUI();
+}
+
+
+/******************************************************************************************
+***     STOP PLAYING SONG                                                               ***
+******************************************************************************************/
+void stopPlayingSong() {
+  Serial.println("STOP PLAYING");
+  isPlaying = false;
+  updateWebUI();
+}
+
+
+/******************************************************************************************
+***     SETUP                                                                           ***
+******************************************************************************************/
+void setup() {
+  // Start serial communication
+  Serial.begin(115200);
+
+  // Init SPIFFS
+  initFS();
+
+  // Init WiFi
+  initWiFi();
+
+  // Init WebSocket
+  initWebSocket();
+
+  // Add routes
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(SPIFFS, "index.html", "text/html");  
+  });
+
+  // Server config
+  server.serveStatic("/", SPIFFS, "/");
+
+  // Init server
+  server.begin();
+
+  // RFID Reader setup
+  SPI.begin(); // init SPI bus
+  rfidReader.PCD_Init(); // init RFID reader
+  Serial.println("RFID Reader is ready...");
 }
 
 
@@ -89,6 +251,9 @@ void checkTagValidity(String tag_uid) {
 ***     LOOP                                                                            ***
 ******************************************************************************************/
 void loop() {
+  // Cleanup WS clients
+  ws.cleanupClients();
+  
   if (!rfidReader.PICC_IsNewCardPresent()) {
     return;
   }
@@ -133,6 +298,7 @@ void loop() {
   }
 
   Serial.println("Card Removed");
+  stopPlayingSong();
 
   delay(rfidReadInterval); // Interval at which to read cards
 
