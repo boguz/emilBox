@@ -17,6 +17,7 @@
     background-color: transparent;
     opacity: .5;
     font-size: var(--font-size-ms);
+    font-weight: var(--font-weight-bold);
     padding-bottom: var(--spacing-s);
     position: relative;
 }

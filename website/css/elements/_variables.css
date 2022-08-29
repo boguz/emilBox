@@ -2,10 +2,10 @@
 ::after,
 ::before {
     --color-bg: hsl(0, 0%, 100%);
-    --color-primary-h: 180;
-    --color-primary: hsl(var(--color-primary-h), 21%, 53%);
-    --color-primary-light: hsl(var(--color-primary-h), 32%, 93%);
-    --color-primary-dark: hsl(var(--color-primary-h), 22%, 37%);
+    --color-primary-h: 185;
+    --color-primary: hsl(var(--color-primary-h), 80%, 40%);
+    --color-primary-light: hsl(var(--color-primary-h), 25%, 90%);
+    --color-primary-dark: hsl(var(--color-primary-h), 75%, 25%);
 
     --spacing-xl: 3rem;
     --spacing-l: 2rem;

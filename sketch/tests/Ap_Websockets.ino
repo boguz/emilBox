@@ -1,16 +1,15 @@
 /*
-   https://shawnhymel.com/1882/how-to-create-a-web-server-with-websockets-using-an-esp32-in-arduino/
-*/
+ * https://shawnhymel.com/1882/how-to-create-a-web-server-with-websockets-using-an-esp32-in-arduino/
+ */
 
 #include <WiFi.h>
 #include <SPIFFS.h>
 #include <ESPAsyncWebServer.h>
 #include <WebSocketsServer.h>
-#include <ArduinoJson.h>
 
 // Constants
-const char *ssid = "EmilBox";
-const char *password =  "e1000";
+const char *ssid = "ESP32-AP";
+const char *password =  "LetMeInPlz";
 const char *msg_toggle_led = "toggleLED";
 const char *msg_get_led = "getLEDState";
 const int dns_port = 53;
@@ -24,84 +23,15 @@ WebSocketsServer webSocket = WebSocketsServer(1337);
 char msg_buf[10];
 int led_state = 0;
 
-// Volume Variables
-int VOLUME = 15;
-int VOLUME_NORMAL_MAX = 30;
-int VOLUME_LIMIT_MAX = 15;
-int VOLUME_MAX = VOLUME_NORMAL_MAX;
-int VOLUME_MIN = 0;
-int VOLUME_CHANGE_AMOUNT = 1;
-bool VOLUME_IS_LIMITED = false;
-
-// Player variables
-bool IS_PLAYING = false;
-char TRACK_NAME[] = "Air on the G String";
-char ARTIST_NAME[] = "Bach";
-
 /***********************************************************
-   Functions
-*/
-
-void volumeDecrease() {
-    if (VOLUME > VOLUME_MIN) {
-        VOLUME = VOLUME - VOLUME_CHANGE_AMOUNT;
-    }
-}
-
-void volumeIncrease() {
-    if (VOLUME < VOLUME_MAX) {
-        VOLUME = VOLUME + VOLUME_CHANGE_AMOUNT;
-    } else {
-        VOLUME = VOLUME_MAX;
-    }
-}
-
-void updateVolumeLimitState(bool state) {
-    VOLUME_IS_LIMITED = state;
-}
-
-void broadcastUpdate(uint8_t client_num) {
-    DynamicJsonDocument doc(1024);
-
-    doc["volume"] = VOLUME;
-    doc["volume_max"] = VOLUME_MAX;
-    doc["volume_is_limited"] = VOLUME_IS_LIMITED;
-    doc["is_playing"] = IS_PLAYING;
-    doc["track_name"] = TRACK_NAME;
-    doc["artist_name"] = ARTIST_NAME;
-
-    char json_string[1024];
-    serializeJson(doc, json_string);
-    webSocket.broadcastTXT(json_string);
-}
-
-void handleWsTextMessage(uint8_t client_num, uint8_t * payload) {
-  if ( strcmp((char *)payload, "getValues") == 0 ) {
-    broadcastUpdate(client_num);
-  } else if ( strcmp((char *)payload, "volume_down_button_click") == 0 ) {
-    volumeDecrease();
-    broadcastUpdate(client_num);
-  } else if ( strcmp((char *)payload, "volume_up_button_click") == 0 ) {
-    volumeIncrease();
-    broadcastUpdate(client_num);
-  } else if ( strcmp((char *)payload, "volume_limit_checkbox_on") == 0 ) {
-    updateVolumeLimitState(true);
-    broadcastUpdate(client_num);
-  } else if ( strcmp((char *)payload, "volume_limit_checkbox_off") == 0 ) {
-    updateVolumeLimitState(false);
-    broadcastUpdate(client_num);
-  } else { // Message not recognized
-    Serial.println("[%u] Message not recognized");
-  }
-}
-
-
+ * Functions
+ */
 
 // Callback: receiving any WebSocket message
 void onWebSocketEvent(uint8_t client_num, WStype_t type, uint8_t * payload, size_t length) {
 
   // Figure out the type of WebSocket event
-  switch (type) {
+  switch(type) {
 
     // Client has disconnected
     case WStype_DISCONNECTED:
@@ -123,8 +53,22 @@ void onWebSocketEvent(uint8_t client_num, WStype_t type, uint8_t * payload, size
       // Print out raw message
       Serial.printf("[%u] Received text: %s\n", client_num, payload);
 
-      handleWsTextMessage(client_num, payload);
+      // Toggle LED
+      if ( strcmp((char *)payload, "toggleLED") == 0 ) {
+        led_state = led_state ? 0 : 1;
+        Serial.printf("Toggling LED to %u\n", led_state);
+        digitalWrite(led_pin, led_state);
 
+      // Report the state of the LED
+      } else if ( strcmp((char *)payload, "getLEDState") == 0 ) {
+        sprintf(msg_buf, "%d", led_state);
+        Serial.printf("Sending to [%u]: %s\n", client_num, msg_buf);
+        webSocket.sendTXT(client_num, msg_buf);
+
+      // Message not recognized
+      } else {
+        Serial.println("[%u] Message not recognized");
+      }
       break;
 
     // For everything else: do nothing
@@ -143,21 +87,45 @@ void onWebSocketEvent(uint8_t client_num, WStype_t type, uint8_t * payload, size
 void onIndexRequest(AsyncWebServerRequest *request) {
   IPAddress remote_ip = request->client()->remoteIP();
   Serial.println("[" + remote_ip.toString() +
-                 "] HTTP GET request of " + request->url());
+                  "] HTTP GET request of " + request->url());
   request->send(SPIFFS, "/index.html", "text/html");
+}
+
+// Callback: send style sheet
+void onCSSRequest(AsyncWebServerRequest *request) {
+  IPAddress remote_ip = request->client()->remoteIP();
+  Serial.println("[" + remote_ip.toString() +
+                  "] HTTP GET request of " + request->url());
+  request->send(SPIFFS, "/emilbox.css", "text/css");
+}
+
+// Callback: send js file
+void onJSRequest(AsyncWebServerRequest *request) {
+  IPAddress remote_ip = request->client()->remoteIP();
+  Serial.println("[" + remote_ip.toString() +
+                  "] HTTP GET request of " + request->url());
+  request->send(SPIFFS, "/emilbox.js", "text/css");
+}
+
+// Callback: send logo file
+void onLogoRequest(AsyncWebServerRequest *request) {
+  IPAddress remote_ip = request->client()->remoteIP();
+  Serial.println("[" + remote_ip.toString() +
+                  "] HTTP GET request of " + request->url());
+  request->send(SPIFFS, "/emilBox-logo.svg", "text/css");
 }
 
 // Callback: send 404 if requested file does not exist
 void onPageNotFound(AsyncWebServerRequest *request) {
   IPAddress remote_ip = request->client()->remoteIP();
   Serial.println("[" + remote_ip.toString() +
-                 "] HTTP GET request of " + request->url());
+                  "] HTTP GET request of " + request->url());
   request->send(404, "text/plain", "Not found");
 }
 
 /***********************************************************
-   Main
-*/
+ * Main
+ */
 
 void setup() {
   // Init LED and turn off
@@ -168,9 +136,9 @@ void setup() {
   Serial.begin(115200);
 
   // Make sure we can read the file system
-  if ( !SPIFFS.begin()) {
+  if( !SPIFFS.begin()){
     Serial.println("Error mounting SPIFFS");
-    while (1);
+    while(1);
   }
 
   // Start access point
@@ -185,10 +153,16 @@ void setup() {
   // On HTTP request for root, provide index.html file
   server.on("/", HTTP_GET, onIndexRequest);
 
-  // Serve static files
-  server.serveStatic("/", SPIFFS, "/");
+  // On HTTP request for style sheet, provide style.css
+  server.on("/emilbox.css", HTTP_GET, onCSSRequest);
 
-  // 404 page
+  // On HTTP request for js, provide emilbox.js
+  server.on("/emilbox.js", HTTP_GET, onJSRequest);
+
+  // On HTTP request for logo, provide emilBol-logo.svg
+  server.on("/emilBox-logo.svg", HTTP_GET, onLogoRequest);
+
+  // Handle requests for pages that do not exist
   server.onNotFound(onPageNotFound);
 
   // Start web server
@@ -197,9 +171,11 @@ void setup() {
   // Start WebSocket server and assign callback
   webSocket.begin();
   webSocket.onEvent(onWebSocketEvent);
+
 }
 
 void loop() {
+
   // Look for and handle WebSocket data
   webSocket.loop();
 }

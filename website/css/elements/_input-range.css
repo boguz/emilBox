@@ -10,6 +10,7 @@ input[type="range"] {
 }
 
 input[type="range"]::-webkit-slider-thumb {
+    display: none;
     width: calc(var(--spacing-normal) + 4px);
     height: calc(var(--spacing-normal) + 4px);
     border-radius: 50%;

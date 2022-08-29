@@ -9,6 +9,7 @@ class InputRange {
     }
 
     private _updateUI() {
+        console.log('updating range ui');
         const percentage = this._getPercentageOfValue(+this.input.min, +this.input.max, +this.input.value);
         this.input.style.background = `linear-gradient(to right, var(--color-primary-dark) 0%, var(--color-primary-dark) ${percentage}%, var(--color-primary) ${percentage}%, var(--color-primary) 100%)`
     }
@@ -22,5 +23,6 @@ export function initInputRange(): void {
     const inputRange = document.querySelector('input[type="range"]') as HTMLInputElement;
     if (!inputRange) return;
 
-    new InputRange(inputRange);
+    // @ts-ignore
+    window.volumeInput = new InputRange(inputRange);
 }
