@@ -10,9 +10,7 @@
 
 // Constants
 const char *ssid = "EmilBox";
-const char *password =  "e1000";
-const char *msg_toggle_led = "toggleLED";
-const char *msg_get_led = "getLEDState";
+const char *password =  "e1000e1000";
 const int dns_port = 53;
 const int http_port = 80;
 const int ws_port = 1337;
