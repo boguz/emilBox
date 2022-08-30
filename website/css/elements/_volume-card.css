@@ -9,6 +9,34 @@
     position: relative;
 }
 
+.volume-card__input-group {
+    width: 100%;
+    position: relative;
+}
+
+.volume-group__input-number {
+    position: absolute;
+    font-size: var(--font-size-s);
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: .5;
+    color: var(--color-bg);
+}
+
+.volume-group__input-number--min {
+    left: var(--spacing-s);
+}
+
+.volume-group__input-number--current {
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 1;
+}
+
+.volume-group__input-number--max {
+    right: var(--spacing-s);
+}
+
 .volume-card__title {
     color: var(--color-primary);
     opacity: .75;

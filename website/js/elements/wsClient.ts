@@ -7,12 +7,18 @@ let volDownButton: HTMLElement | null = null;
 let volUpButton: HTMLElement | null = null;
 let volLimitCheckbox: HTMLInputElement | null = null;
 let volSlider: HTMLInputElement | null = null;
+let volRangeMin: HTMLSpanElement | null = null;
+let volRangeCurrent: HTMLSpanElement | null = null;
+let volRangeMax: HTMLSpanElement | null = null;
+
+
 let playerCard: HTMLInputElement | null = null;
 let playerArtist: HTMLInputElement | null = null;
 let playerTrack: HTMLInputElement | null = null;
 
 interface DataInterface {
     volume: number,
+    volume_min: number,
     volume_max: number,
     volume_is_limited: boolean,
     is_playing: boolean,
@@ -56,6 +62,10 @@ function setupPageElements() {
     volUpButton = document.querySelector('.button--volume-up');
     volLimitCheckbox = document.querySelector('#limitVolumeCheckbox');
     volSlider = document.querySelector('.volume-card__input');
+    volRangeMin = document.querySelector('.volume-group__input-number--min');
+    volRangeCurrent = document.querySelector('.volume-group__input-number--current');
+    volRangeMax = document.querySelector('.volume-group__input-number--max');
+
     playerCard = document.querySelector('.media-player');
     playerArtist = document.querySelector('.media-player__title');
     playerTrack = document.querySelector('.media-player__track');
@@ -78,6 +88,9 @@ function setupPageElements() {
 }
 
 function updateVolumeCard(data: DataInterface) {
+    volRangeMin.textContent = String(data.volume_min);
+    volRangeMax.textContent = String(data.volume_max);
+    volRangeCurrent.textContent = String(data.volume);
     volSlider.setAttribute('max', String(data.volume_max));
     volSlider.value = String(data.volume);
     volSlider.dispatchEvent(new Event('input'));

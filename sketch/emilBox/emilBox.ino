@@ -64,6 +64,7 @@ void broadcastUpdate(uint8_t client_num) {
     DynamicJsonDocument doc(1024);
 
     doc["volume"] = VOLUME;
+    doc["volume_min"] = VOLUME_MIN;
     doc["volume_max"] = VOLUME_MAX;
     doc["volume_is_limited"] = VOLUME_IS_LIMITED;
     doc["is_playing"] = IS_PLAYING;

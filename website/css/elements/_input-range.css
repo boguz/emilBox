@@ -1,5 +1,5 @@
 input[type="range"] {
-    --input-range-height: 8px;
+    --input-range-height: 16px;
 
     width: 100%;
     margin: var(--spacing-l) 0;

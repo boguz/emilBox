@@ -42,3 +42,16 @@
     display: flex;
     gap: var(--spacing-l);
 }
+
+.media-player:not([is-playing]) {
+    filter: saturate(.125);
+    pointer-events: none;
+}
+
+.media-player:not([is-playing]) .media-player__image {
+    filter: saturate(.25);
+}
+
+.media-player:not([is-playing]) .media-player__buttons {
+    opacity: .25;
+}

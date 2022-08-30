@@ -7,17 +7,13 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>emilBox</title>
 
-<!--    <link rel="preconnect" href="https://fonts.googleapis.com">-->
-<!--    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>-->
-<!--    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@500;700&display=swap" rel="stylesheet">-->
-
-    <link rel="stylesheet" href="../sketch/emilBox/data/emilbox.css">
-    <script src="../sketch/emilBox/data/emilbox.js" defer></script>
+    <link rel="stylesheet" href="./build/css/emilbox.css">
+    <script src="./build/js/emilbox.js" defer></script>
 </head>
 <body>
 
     <header class="header">
-        <img src="../sketch/emilBox/data/emilBox-logo.svg" alt="emilBox logo" class="header__logo">
+        <span class="header__thin">emil</span><span class="header__bold">Box</span>
     </header>
 
     <main>
@@ -41,7 +37,12 @@
                     </article>
                     <article class="volume-card">
                         <h3 class="volume-card__title">Volume</h3>
-                        <input type="range" min="0" max="30" class="volume-card__input" value="15">
+                        <div class="volume-card__input-group">
+                            <span class="volume-group__input-number volume-group__input-number--min">0</span>
+                            <span class="volume-group__input-number volume-group__input-number--current">15</span>
+                            <span class="volume-group__input-number volume-group__input-number--max">30</span>
+                            <input type="range" min="0" max="30" class="volume-card__input" value="15">
+                        </div>
                         <div class="volume-card__buttons">
                             <button class="button button--volume-down"></button>
                             <button class="button button--volume-up"></button>

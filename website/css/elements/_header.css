@@ -9,7 +9,17 @@
     display: flex;
     align-items: center;
     justify-content: flex-start;
+    font-size: var(--font-size-m);
+    color: var(--color-bg);
     z-index: 10;
+}
+
+.header__thin {
+    font-weight: var(--font-weight-lighter);
+}
+
+.header__bold {
+    font-weight: var(--font-weight-bold);
 }
 
 .header__logo {
