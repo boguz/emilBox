@@ -36,6 +36,15 @@ bool IS_PLAYING = false;
 char TRACK_NAME[] = "Air on the G String";
 char ARTIST_NAME[] = "Bach";
 
+// Button variables
+const int BUTTON_VOL_DOWN_PIN = 34;
+const int BUTTON_VOL_UP_PIN = 35;
+bool BUTTON_VOL_DOWN_STATE = HIGH;
+bool BUTTON_VOL_DOWN_PREV_STATE = HIGH;
+bool BUTTON_VOL_UP_STATE = HIGH;
+bool BUTTON_VOL_UP_PREV_STATE = HIGH;
+
+
 /***********************************************************
    Functions
 */
@@ -43,14 +52,17 @@ char ARTIST_NAME[] = "Bach";
 void volumeDecrease() {
     if (VOLUME > VOLUME_MIN) {
         VOLUME = VOLUME - VOLUME_CHANGE_AMOUNT;
+        broadcastUpdate();
     }
 }
 
 void volumeIncrease() {
     if (VOLUME < VOLUME_MAX) {
         VOLUME = VOLUME + VOLUME_CHANGE_AMOUNT;
+        broadcastUpdate();
     } else {
         VOLUME = VOLUME_MAX;
+        broadcastUpdate();
     }
 }
 
@@ -58,7 +70,7 @@ void updateVolumeLimitState(bool state) {
     VOLUME_IS_LIMITED = state;
 }
 
-void broadcastUpdate(uint8_t client_num) {
+void broadcastUpdate() {
     DynamicJsonDocument doc(1024);
 
     doc["volume"] = VOLUME;
@@ -76,19 +88,17 @@ void broadcastUpdate(uint8_t client_num) {
 
 void handleWsTextMessage(uint8_t client_num, uint8_t * payload) {
   if ( strcmp((char *)payload, "getValues") == 0 ) {
-    broadcastUpdate(client_num);
+    broadcastUpdate();
   } else if ( strcmp((char *)payload, "volume_down_button_click") == 0 ) {
     volumeDecrease();
-    broadcastUpdate(client_num);
   } else if ( strcmp((char *)payload, "volume_up_button_click") == 0 ) {
     volumeIncrease();
-    broadcastUpdate(client_num);
   } else if ( strcmp((char *)payload, "volume_limit_checkbox_on") == 0 ) {
     updateVolumeLimitState(true);
-    broadcastUpdate(client_num);
+    broadcastUpdate();
   } else if ( strcmp((char *)payload, "volume_limit_checkbox_off") == 0 ) {
     updateVolumeLimitState(false);
-    broadcastUpdate(client_num);
+    broadcastUpdate();
   } else { // Message not recognized
     Serial.println("[%u] Message not recognized");
   }
@@ -159,9 +169,9 @@ void onPageNotFound(AsyncWebServerRequest *request) {
 */
 
 void setup() {
-  // Init LED and turn off
-  pinMode(led_pin, OUTPUT);
-  digitalWrite(led_pin, LOW);
+  // Init buttons
+  pinMode(BUTTON_VOL_DOWN_PIN, INPUT_PULLUP);
+  pinMode(BUTTON_VOL_UP_PIN, INPUT_PULLUP);
 
   // Start Serial port
   Serial.begin(115200);
@@ -199,6 +209,26 @@ void setup() {
 }
 
 void loop() {
+  // Check buttons
+  bool buttonDownState = digitalRead(BUTTON_VOL_DOWN_PIN);
+  if (buttonDownState == LOW && BUTTON_VOL_DOWN_PREV_STATE == HIGH) {
+    Serial.println("button down pressed");
+    volumeDecrease();
+    BUTTON_VOL_DOWN_PREV_STATE = LOW;
+  } else if (buttonDownState == HIGH && BUTTON_VOL_DOWN_PREV_STATE == LOW) {
+    BUTTON_VOL_DOWN_PREV_STATE = HIGH;
+  }
+
+  bool buttonUpState = digitalRead(BUTTON_VOL_UP_PIN);
+  if (buttonUpState == LOW && BUTTON_VOL_UP_PREV_STATE == HIGH) {
+    Serial.println("button up pressed");
+    volumeIncrease();
+    BUTTON_VOL_UP_PREV_STATE = LOW;
+  } else if (buttonUpState == HIGH && BUTTON_VOL_UP_PREV_STATE == LOW) {
+    BUTTON_VOL_UP_PREV_STATE = HIGH;
+  }
+
+
   // Look for and handle WebSocket data
   webSocket.loop();
 }
