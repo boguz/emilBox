@@ -7,6 +7,7 @@
 #include <ESPAsyncWebServer.h>
 #include <WebSocketsServer.h>
 #include <ArduinoJson.h>
+#include "web_index.h"
 
 // Constants
 const char *ssid = "EmilBox";
@@ -159,10 +160,14 @@ void onWebSocketEvent(uint8_t client_num, WStype_t type, uint8_t * payload, size
 
 // Callback: send homepage
 void onIndexRequest(AsyncWebServerRequest *request) {
+  const char* dataType = "text/html";
   IPAddress remote_ip = request->client()->remoteIP();
   Serial.println("[" + remote_ip.toString() +
                  "] HTTP GET request of " + request->url());
-  request->send(SPIFFS, "/index.html", "text/html");
+//   request->send(SPIFFS, "/index.html", "text/html");
+  AsyncWebServerResponse *response = request->beginResponse_P(200, dataType, index_html_gz, index_html_gz_len);
+  response->addHeader("Content-Encoding", "gzip");
+  request->send(response);
 }
 
 // Callback: send 404 if requested file does not exist
