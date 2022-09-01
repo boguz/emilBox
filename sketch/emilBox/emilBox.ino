@@ -38,11 +38,20 @@ char ARTIST_NAME[] = "Bach";
 
 // Button variables
 const int BUTTON_VOL_DOWN_PIN = 34;
-const int BUTTON_VOL_UP_PIN = 35;
 bool BUTTON_VOL_DOWN_STATE = HIGH;
 bool BUTTON_VOL_DOWN_PREV_STATE = HIGH;
+
+const int BUTTON_VOL_UP_PIN = 35;
 bool BUTTON_VOL_UP_STATE = HIGH;
 bool BUTTON_VOL_UP_PREV_STATE = HIGH;
+
+const int BUTTON_STOP_PIN = 32;
+bool BUTTON_STOP_STATE = HIGH;
+bool BUTTON_STOP_PREV_STATE = HIGH;
+
+const int BUTTON_NEXT_PIN = 33;
+bool BUTTON_NEXT_STATE = HIGH;
+bool BUTTON_NEXT_PREV_STATE = HIGH;
 
 
 /***********************************************************
@@ -50,40 +59,40 @@ bool BUTTON_VOL_UP_PREV_STATE = HIGH;
 */
 
 void volumeDecrease() {
-    if (VOLUME > VOLUME_MIN) {
-        VOLUME = VOLUME - VOLUME_CHANGE_AMOUNT;
-        broadcastUpdate();
-    }
+  if (VOLUME > VOLUME_MIN) {
+    VOLUME = VOLUME - VOLUME_CHANGE_AMOUNT;
+    broadcastUpdate();
+  }
 }
 
 void volumeIncrease() {
-    if (VOLUME < VOLUME_MAX) {
-        VOLUME = VOLUME + VOLUME_CHANGE_AMOUNT;
-        broadcastUpdate();
-    } else {
-        VOLUME = VOLUME_MAX;
-        broadcastUpdate();
-    }
+  if (VOLUME < VOLUME_MAX) {
+    VOLUME = VOLUME + VOLUME_CHANGE_AMOUNT;
+    broadcastUpdate();
+  } else {
+    VOLUME = VOLUME_MAX;
+    broadcastUpdate();
+  }
 }
 
 void updateVolumeLimitState(bool state) {
-    VOLUME_IS_LIMITED = state;
+  VOLUME_IS_LIMITED = state;
 }
 
 void broadcastUpdate() {
-    DynamicJsonDocument doc(1024);
+  DynamicJsonDocument doc(1024);
 
-    doc["volume"] = VOLUME;
-    doc["volume_min"] = VOLUME_MIN;
-    doc["volume_max"] = VOLUME_MAX;
-    doc["volume_is_limited"] = VOLUME_IS_LIMITED;
-    doc["is_playing"] = IS_PLAYING;
-    doc["track_name"] = TRACK_NAME;
-    doc["artist_name"] = ARTIST_NAME;
+  doc["volume"] = VOLUME;
+  doc["volume_min"] = VOLUME_MIN;
+  doc["volume_max"] = VOLUME_MAX;
+  doc["volume_is_limited"] = VOLUME_IS_LIMITED;
+  doc["is_playing"] = IS_PLAYING;
+  doc["track_name"] = TRACK_NAME;
+  doc["artist_name"] = ARTIST_NAME;
 
-    char json_string[1024];
-    serializeJson(doc, json_string);
-    webSocket.broadcastTXT(json_string);
+  char json_string[1024];
+  serializeJson(doc, json_string);
+  webSocket.broadcastTXT(json_string);
 }
 
 void handleWsTextMessage(uint8_t client_num, uint8_t * payload) {
@@ -168,10 +177,54 @@ void onPageNotFound(AsyncWebServerRequest *request) {
    Main
 */
 
+void handleButtons() {
+  // VOLUME DOWN BUTTON
+  bool buttonVolDownState = digitalRead(BUTTON_VOL_DOWN_PIN);
+  if (buttonVolDownState == LOW && BUTTON_VOL_DOWN_PREV_STATE == HIGH) {
+    Serial.println("button down pressed");
+    volumeDecrease();
+    BUTTON_VOL_DOWN_PREV_STATE = LOW;
+  } else if (buttonVolDownState == HIGH && BUTTON_VOL_DOWN_PREV_STATE == LOW) {
+    BUTTON_VOL_DOWN_PREV_STATE = HIGH;
+  }
+
+  // VOLUME UP BUTTON
+  bool buttonVolUpState = digitalRead(BUTTON_VOL_UP_PIN);
+  if (buttonVolUpState == LOW && BUTTON_VOL_UP_PREV_STATE == HIGH) {
+    Serial.println("button up pressed");
+    volumeIncrease();
+    BUTTON_VOL_UP_PREV_STATE = LOW;
+  } else if (buttonVolUpState == HIGH && BUTTON_VOL_UP_PREV_STATE == LOW) {
+    BUTTON_VOL_UP_PREV_STATE = HIGH;
+  }
+
+  // STOP BUTTON
+  bool buttonStopState = digitalRead(BUTTON_STOP_PIN);
+  if (buttonStopState == LOW && BUTTON_STOP_PREV_STATE == HIGH) {
+    Serial.println("button stop pressed");
+    volumeIncrease();
+    BUTTON_STOP_PREV_STATE = LOW;
+  } else if (buttonStopState == HIGH && BUTTON_STOP_PREV_STATE == LOW) {
+    BUTTON_STOP_PREV_STATE = HIGH;
+  }
+
+  // NEXT BUTTON
+  bool buttonNextState = digitalRead(BUTTON_NEXT_PIN);
+  if (buttonNextState == LOW && BUTTON_NEXT_PREV_STATE == HIGH) {
+    Serial.println("button next pressed");
+    volumeIncrease();
+    BUTTON_NEXT_PREV_STATE = LOW;
+  } else if (buttonNextState == HIGH && BUTTON_NEXT_PREV_STATE == LOW) {
+    BUTTON_NEXT_PREV_STATE = HIGH;
+  }
+}
+
 void setup() {
   // Init buttons
   pinMode(BUTTON_VOL_DOWN_PIN, INPUT_PULLUP);
   pinMode(BUTTON_VOL_UP_PIN, INPUT_PULLUP);
+  pinMode(BUTTON_STOP_PIN, INPUT_PULLUP);
+  pinMode(BUTTON_NEXT_PIN, INPUT_PULLUP);
 
   // Start Serial port
   Serial.begin(115200);
@@ -209,25 +262,8 @@ void setup() {
 }
 
 void loop() {
-  // Check buttons
-  bool buttonDownState = digitalRead(BUTTON_VOL_DOWN_PIN);
-  if (buttonDownState == LOW && BUTTON_VOL_DOWN_PREV_STATE == HIGH) {
-    Serial.println("button down pressed");
-    volumeDecrease();
-    BUTTON_VOL_DOWN_PREV_STATE = LOW;
-  } else if (buttonDownState == HIGH && BUTTON_VOL_DOWN_PREV_STATE == LOW) {
-    BUTTON_VOL_DOWN_PREV_STATE = HIGH;
-  }
-
-  bool buttonUpState = digitalRead(BUTTON_VOL_UP_PIN);
-  if (buttonUpState == LOW && BUTTON_VOL_UP_PREV_STATE == HIGH) {
-    Serial.println("button up pressed");
-    volumeIncrease();
-    BUTTON_VOL_UP_PREV_STATE = LOW;
-  } else if (buttonUpState == HIGH && BUTTON_VOL_UP_PREV_STATE == LOW) {
-    BUTTON_VOL_UP_PREV_STATE = HIGH;
-  }
-
+  // Check for button clicks
+  handleButtons();
 
   // Look for and handle WebSocket data
   webSocket.loop();
