@@ -1,7 +1,11 @@
 /*
    https://shawnhymel.com/1882/how-to-create-a-web-server-with-websockets-using-an-esp32-in-arduino/
+
+   For the remove detect RFID tag: https://github.com/miguelbalboa/rfid/issues/352#issue-282870788
 */
 
+#include <SPI.h>
+#include <MFRC522.h>
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
 #include <WebSocketsServer.h>
@@ -14,12 +18,22 @@ const char *password =  "e1000e1000";
 const int dns_port = 53;
 const int http_port = 80;
 const int ws_port = 1337;
-const int led_pin = 15;
 
 // Globals
 AsyncWebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(1337);
 char msg_buf[10];
+
+// Tag reader variables
+#define RFID_RC522_RST_PIN  27
+#define RFID_RC522_SDA_PIN  5
+
+MFRC522 mfrc522(RFID_RC522_SDA_PIN, RFID_RC522_RST_PIN);
+
+bool rfid_tag_present_prev = false;
+bool rfid_tag_present = false;
+int _rfid_error_counter = 0;
+bool _tag_found = false;
 
 // Volume Variables
 int VOLUME = 15;
@@ -32,8 +46,8 @@ bool VOLUME_IS_LIMITED = false;
 
 // Player variables
 bool IS_PLAYING = false;
-char TRACK_NAME[] = "Air on the G String";
-char ARTIST_NAME[] = "Bach";
+String TRACK_NAME = "-";
+String ARTIST_NAME = "-";
 
 // Button variables
 const int BUTTON_VOL_DOWN_PIN = 34;
@@ -52,6 +66,9 @@ const int BUTTON_NEXT_PIN = 33;
 bool BUTTON_NEXT_STATE = HIGH;
 bool BUTTON_NEXT_PREV_STATE = HIGH;
 
+// Tag IDs
+String TAG_TEST = "93 44 5C 92";
+String TAG_BACH = "9C CD 69 0F";
 
 /***********************************************************
    Functions
@@ -161,7 +178,7 @@ void onIndexRequest(AsyncWebServerRequest *request) {
   IPAddress remote_ip = request->client()->remoteIP();
   Serial.println("[" + remote_ip.toString() +
                  "] HTTP GET request of " + request->url());
-//   request->send(SPIFFS, "/index.html", "text/html");
+  //   request->send(SPIFFS, "/index.html", "text/html");
   AsyncWebServerResponse *response = request->beginResponse_P(200, dataType, index_html_gz, index_html_gz_len);
   response->addHeader("Content-Encoding", "gzip");
   request->send(response);
@@ -221,6 +238,35 @@ void handleButtons() {
   }
 }
 
+String getTagUid() {
+  String content = "";
+  byte letter;
+  for (byte i = 0; i < mfrc522.uid.size; i++) {
+    content.concat(String(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " "));
+    content.concat(String(mfrc522.uid.uidByte[i], HEX));
+  }
+  content.toUpperCase();
+  String tag_uid = content.substring(1);
+  Serial.println("Getting tag uid");
+  Serial.println(content.substring(1));
+  return content.substring(1);
+}
+
+void checkTagValidity(String tag_uid) {
+  if (tag_uid == TAG_TEST) {
+    Serial.println("BLUE TAG");
+    ARTIST_NAME = "Blue Tag";
+    TRACK_NAME = "Super Track name";
+    IS_PLAYING = true;
+    broadcastUpdate();
+  } else if (tag_uid == TAG_BACH) {
+    Serial.println("BACH");
+  } else {
+    Serial.println("UNKNOWN CARD: ");
+    Serial.print(tag_uid);
+  }
+}
+
 void setup() {
   // Init buttons
   pinMode(BUTTON_VOL_DOWN_PIN, INPUT_PULLUP);
@@ -230,6 +276,12 @@ void setup() {
 
   // Start Serial port
   Serial.begin(115200);
+
+  // Init SPI bus (for the tag reader)
+  SPI.begin();
+
+  // Init the tag reader
+  mfrc522.PCD_Init();
 
   // Start access point
   WiFi.softAP(ssid, password);
@@ -260,4 +312,52 @@ void loop() {
 
   // Look for and handle WebSocket data
   webSocket.loop();
+
+  rfid_tag_present_prev = rfid_tag_present;
+
+  _rfid_error_counter += 1;
+  if (_rfid_error_counter > 2) {
+    _tag_found = false;
+  }
+
+  // Detect Tag without looking for collisions
+  byte bufferATQA[2];
+  byte bufferSize = sizeof(bufferATQA);
+
+  // Reset baud rates
+  mfrc522.PCD_WriteRegister(mfrc522.TxModeReg, 0x00);
+  mfrc522.PCD_WriteRegister(mfrc522.RxModeReg, 0x00);
+  // Reset ModWidthReg
+  mfrc522.PCD_WriteRegister(mfrc522.ModWidthReg, 0x26);
+
+  MFRC522::StatusCode result = mfrc522.PICC_RequestA(bufferATQA, &bufferSize);
+
+  if (result == mfrc522.STATUS_OK) {
+    if ( ! mfrc522.PICC_ReadCardSerial()) { //Since a PICC placed get Serial and continue
+      return;
+    }
+    _rfid_error_counter = 0;
+    _tag_found = true;
+  }
+
+  rfid_tag_present = _tag_found;
+
+  // rising edge
+  if (rfid_tag_present && !rfid_tag_present_prev) {
+    Serial.println("Tag found");
+    // Get tag uid
+    String tag_uid = getTagUid();
+
+    // Check if valid tag
+    checkTagValidity(tag_uid);
+  }
+
+  // falling edge
+  if (!rfid_tag_present && rfid_tag_present_prev) {
+    Serial.println("Tag gone");
+    ARTIST_NAME = "-";
+    TRACK_NAME = "-";
+    IS_PLAYING = false;
+    broadcastUpdate();
+  }
 }
