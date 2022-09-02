@@ -3,7 +3,6 @@
 */
 
 #include <WiFi.h>
-#include <SPIFFS.h>
 #include <ESPAsyncWebServer.h>
 #include <WebSocketsServer.h>
 #include <ArduinoJson.h>
@@ -21,7 +20,6 @@ const int led_pin = 15;
 AsyncWebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(1337);
 char msg_buf[10];
-int led_state = 0;
 
 // Volume Variables
 int VOLUME = 15;
@@ -78,6 +76,7 @@ void volumeIncrease() {
 
 void updateVolumeLimitState(bool state) {
   VOLUME_IS_LIMITED = state;
+  broadcastUpdate();
 }
 
 void broadcastUpdate() {
@@ -105,10 +104,8 @@ void handleWsTextMessage(uint8_t client_num, uint8_t * payload) {
     volumeIncrease();
   } else if ( strcmp((char *)payload, "volume_limit_checkbox_on") == 0 ) {
     updateVolumeLimitState(true);
-    broadcastUpdate();
   } else if ( strcmp((char *)payload, "volume_limit_checkbox_off") == 0 ) {
     updateVolumeLimitState(false);
-    broadcastUpdate();
   } else { // Message not recognized
     Serial.println("[%u] Message not recognized");
   }
@@ -234,12 +231,6 @@ void setup() {
   // Start Serial port
   Serial.begin(115200);
 
-  // Make sure we can read the file system
-  if ( !SPIFFS.begin()) {
-    Serial.println("Error mounting SPIFFS");
-    while (1);
-  }
-
   // Start access point
   WiFi.softAP(ssid, password);
 
@@ -251,9 +242,6 @@ void setup() {
 
   // On HTTP request for root, provide index.html file
   server.on("/", HTTP_GET, onIndexRequest);
-
-  // Serve static files
-  server.serveStatic("/", SPIFFS, "/");
 
   // 404 page
   server.onNotFound(onPageNotFound);
