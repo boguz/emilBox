@@ -10,6 +10,11 @@
 #include <ESPAsyncWebServer.h>
 #include <WebSocketsServer.h>
 #include <ArduinoJson.h>
+
+#include "FS.h"
+#include "SD.h"
+#include "SPI.h"
+
 #include "web_index.h"
 
 // Constants
@@ -26,7 +31,7 @@ char msg_buf[10];
 
 // Tag reader variables
 #define RFID_RC522_RST_PIN  27
-#define RFID_RC522_SDA_PIN  5
+#define RFID_RC522_SDA_PIN  2
 
 MFRC522 mfrc522(RFID_RC522_SDA_PIN, RFID_RC522_RST_PIN);
 
@@ -70,9 +75,28 @@ bool BUTTON_NEXT_PREV_STATE = HIGH;
 String TAG_TEST = "93 44 5C 92";
 String TAG_BACH = "9C CD 69 0F";
 
+// SD Card variables
+uint8_t cardType;
+
 /***********************************************************
    Functions
 */
+
+void readFile(fs::FS &fs, const char * path){
+  Serial.printf("Reading file: %s\n", path);
+
+  File file = fs.open(path);
+  if(!file){
+    Serial.println("Failed to open file for reading");
+    return;
+  }
+
+  Serial.print("Read from file: ");
+  while(file.available()){
+    Serial.write(file.read());
+  }
+  file.close();
+}
 
 void volumeDecrease() {
   if (VOLUME > VOLUME_MIN) {
@@ -258,12 +282,29 @@ void checkTagValidity(String tag_uid) {
     ARTIST_NAME = "Blue Tag";
     TRACK_NAME = "Super Track name";
     IS_PLAYING = true;
+    readFile(SD, "/hello.txt");
     broadcastUpdate();
   } else if (tag_uid == TAG_BACH) {
     Serial.println("BACH");
   } else {
     Serial.println("UNKNOWN CARD: ");
     Serial.print(tag_uid);
+  }
+}
+
+void setupSDCardReader() {
+  if (!SD.begin(5)) {
+    Serial.println("Card Mount Failed");
+    return;
+  }
+
+  cardType = SD.cardType();
+
+  if (cardType == CARD_NONE) {
+    Serial.println("No SD card attached");
+    return;
+  } else {
+    Serial.println("SD Card mounted successfully");
   }
 }
 
@@ -282,6 +323,8 @@ void setup() {
 
   // Init the tag reader
   mfrc522.PCD_Init();
+
+  setupSDCardReader();
 
   // Start access point
   WiFi.softAP(ssid, password);
