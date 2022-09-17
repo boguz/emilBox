@@ -62,3 +62,9 @@ String TAG_BACH = "9C CD 69 0F";
 
 // SD Card variables
 uint8_t cardType;
+
+// Audio player
+Audio audioPlayer;
+const int AUDIOPLAYER_DOUT = 25;
+const int AUDIOPLAYER_BCLK = 14;
+const int AUDIOPLAYER_LRC = 26;

@@ -6,6 +6,7 @@
 #include <ArduinoJson.h>
 #include "FS.h"
 #include "SD.h"
+#include "Audio.h"
 
 // Import code partials
 #include "_globalsAndVariables.h"
@@ -18,6 +19,7 @@
 #include "_wsRequests.h"
 #include "_buttonHandlers.h"
 #include "_rfidTagReader.h"
+#include "_audioPlayer.h"
 
 /******************************************************************************************
 ******      SETUP                                                                    ******
@@ -61,6 +63,8 @@ void setup() {
   // Start WebSocket server and assign callback
   webSocket.begin();
   webSocket.onEvent(onWebSocketEvent);
+
+  setupAudioPlayer();
 }
 
 /******************************************************************************************
@@ -75,4 +79,6 @@ void loop() {
   
   // Get correct state for the rfid reader, detect new tag and tag removal
   rfidTagReaderLoop();
+
+  audioPlayer.loop();
 }
